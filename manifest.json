@@ -1,0 +1,18 @@
+{
+  "name": "CSS to Expo StyleSheet",
+  "id": "css-to-expo-stylesheet",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "editorType": ["dev"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  },
+  "capabilities": ["codegen"],
+  "codegenLanguages": [
+    {
+      "label": "React Native / Expo",
+      "value": "react-native"
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "name": "css-to-expo-stylesheet",
+  "version": "1.0.0",
+  "description": "Figma plugin to convert CSS to React Native/Expo StyleSheet",
+  "scripts": {
+    "build": "npm run build:code && npm run build:ui",
+    "build:code": "esbuild src/code.ts --bundle --outfile=dist/code.js --target=es6",
+    "build:ui": "cp src/ui.html dist/ui.html",
+    "watch": "npm run build && npm-run-all --parallel watch:*",
+    "watch:code": "esbuild src/code.ts --bundle --outfile=dist/code.js --target=es6 --watch",
+    "watch:ui": "chokidar 'src/ui.html' -c 'cp src/ui.html dist/ui.html'"
+  },
+  "devDependencies": {
+    "@figma/plugin-typings": "^1.98.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.0"
+  },
+  "keywords": ["figma", "plugin", "react-native", "expo", "stylesheet", "css"]
+}

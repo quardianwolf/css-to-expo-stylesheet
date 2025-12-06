@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      font-size: 12px;
+      color: var(--figma-color-text);
+      background: var(--figma-color-bg);
+      padding: 12px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--figma-color-border);
+    }
+
+    .title {
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .node-info {
+      font-size: 11px;
+      color: var(--figma-color-text-secondary);
+    }
+
+    .format-toggle {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 12px;
+    }
+
+    .format-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--figma-color-border);
+      background: var(--figma-color-bg);
+      color: var(--figma-color-text);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 500;
+      transition: all 0.15s;
+    }
+
+    .format-btn:hover {
+      background: var(--figma-color-bg-hover);
+    }
+
+    .format-btn.active {
+      background: var(--figma-color-bg-brand);
+      color: white;
+      border-color: var(--figma-color-bg-brand);
+    }
+
+    .code-container {
+      flex: 1;
+      position: relative;
+      margin-bottom: 12px;
+    }
+
+    .code-output {
+      width: 100%;
+      height: 100%;
+      padding: 12px;
+      border: 1px solid var(--figma-color-border);
+      border-radius: 8px;
+      background: var(--figma-color-bg-secondary);
+      color: var(--figma-color-text);
+      font-family: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      resize: none;
+      outline: none;
+    }
+
+    .code-output:focus {
+      border-color: var(--figma-color-border-brand);
+    }
+
+    .empty-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--figma-color-text-tertiary);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .copy-btn {
+      width: 100%;
+      padding: 10px 16px;
+      background: var(--figma-color-bg-brand);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .copy-btn:hover {
+      opacity: 0.9;
+    }
+
+    .copy-btn:active {
+      transform: scale(0.98);
+    }
+
+    .copy-btn:disabled {
+      background: var(--figma-color-bg-disabled);
+      color: var(--figma-color-text-disabled);
+      cursor: not-allowed;
+    }
+
+    .copy-btn.copied {
+      background: #1bc47d;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <span class="title">CSS to Expo StyleSheet</span>
+    <span class="node-info" id="nodeInfo">No selection</span>
+  </div>
+
+  <div class="format-toggle">
+    <button class="format-btn active" id="stylesheetBtn" data-format="stylesheet">
+      StyleSheet.create
+    </button>
+    <button class="format-btn" id="inlineBtn" data-format="inline">
+      Inline Style
+    </button>
+  </div>
+
+  <div class="code-container">
+    <textarea class="code-output" id="codeOutput" readonly placeholder="Select a layer to see its React Native styles..."></textarea>
+  </div>
+
+  <button class="copy-btn" id="copyBtn" disabled>
+    Copy to Clipboard
+  </button>
+
+  <script>
+    const nodeInfo = document.getElementById('nodeInfo');
+    const codeOutput = document.getElementById('codeOutput');
+    const copyBtn = document.getElementById('copyBtn');
+    const stylesheetBtn = document.getElementById('stylesheetBtn');
+    const inlineBtn = document.getElementById('inlineBtn');
+
+    let currentData = null;
+    let currentFormat = 'stylesheet';
+
+    // Handle format toggle
+    stylesheetBtn.addEventListener('click', () => {
+      currentFormat = 'stylesheet';
+      stylesheetBtn.classList.add('active');
+      inlineBtn.classList.remove('active');
+      updateCodeOutput();
+    });
+
+    inlineBtn.addEventListener('click', () => {
+      currentFormat = 'inline';
+      inlineBtn.classList.add('active');
+      stylesheetBtn.classList.remove('active');
+      updateCodeOutput();
+    });
+
+    function updateCodeOutput() {
+      if (!currentData) {
+        codeOutput.value = '';
+        copyBtn.disabled = true;
+        return;
+      }
+
+      const code = currentFormat === 'stylesheet'
+        ? currentData.styleSheet
+        : currentData.inlineStyle;
+
+      codeOutput.value = code;
+      copyBtn.disabled = false;
+    }
+
+    // Handle copy button
+    copyBtn.addEventListener('click', async () => {
+      const text = codeOutput.value;
+      if (!text) return;
+
+      try {
+        await navigator.clipboard.writeText(text);
+        copyBtn.textContent = 'Copied!';
+        copyBtn.classList.add('copied');
+
+        parent.postMessage({ pluginMessage: { type: 'copy', text } }, '*');
+
+        setTimeout(() => {
+          copyBtn.textContent = 'Copy to Clipboard';
+          copyBtn.classList.remove('copied');
+        }, 2000);
+      } catch (err) {
+        // Fallback for older browsers
+        codeOutput.select();
+        document.execCommand('copy');
+        copyBtn.textContent = 'Copied!';
+        copyBtn.classList.add('copied');
+
+        setTimeout(() => {
+          copyBtn.textContent = 'Copy to Clipboard';
+          copyBtn.classList.remove('copied');
+        }, 2000);
+      }
+    });
+
+    // Handle messages from plugin
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (!msg) return;
+
+      if (msg.type === 'no-selection') {
+        nodeInfo.textContent = 'No selection';
+        codeOutput.value = '';
+        codeOutput.placeholder = msg.message;
+        copyBtn.disabled = true;
+        currentData = null;
+        return;
+      }
+
+      if (msg.type === 'multiple-selection') {
+        nodeInfo.textContent = msg.message;
+        codeOutput.value = '';
+        codeOutput.placeholder = 'Select a single layer to convert';
+        copyBtn.disabled = true;
+        currentData = null;
+        return;
+      }
+
+      if (msg.type === 'selection') {
+        currentData = msg;
+        nodeInfo.textContent = `${msg.nodeName} (${msg.nodeType})`;
+        updateCodeOutput();
+      }
+    };
+
+    // Keyboard shortcut for copy
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'c' && !copyBtn.disabled) {
+        copyBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
