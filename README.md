@@ -35,7 +35,7 @@ A Figma Codegen plugin that converts Figma design styles directly to React Nativ
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/css-to-expo-stylesheet.git
+git clone https://github.com/quardianwolf/css-to-expo-stylesheet.git
 cd css-to-expo-stylesheet
 ```
 
@@ -112,7 +112,7 @@ Contributions are welcome! Here's how you can help:
 
 ### Reporting Bugs
 
-1. Check if the issue already exists in [Issues](https://github.com/yourusername/css-to-expo-stylesheet/issues)
+1. Check if the issue already exists in [Issues](https://github.com/quardianwolf/css-to-expo-stylesheet/issues)
 2. If not, create a new issue with:
    - Clear description of the bug
    - Steps to reproduce
